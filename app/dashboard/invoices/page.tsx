@@ -10,7 +10,7 @@ import { fetchInvoicesPages } from '@/app/lib/data';
 export default async function Page(props: {
     searchParams?: Promise<{
         query?: string;
-        params?: string;
+        page?: string;
     }>;
 }) {
     const searchParams = await props.searchParams;
