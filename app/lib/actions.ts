@@ -24,13 +24,33 @@ const FormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+}
+
 export async function createInvoice(prevState: State, formData: FormData) {
-  const { customerId, amount, status } = CreateInvoice.parse({
+  // Validate using Zod
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status')
   });
 
+  // If form validation fails, returns errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    console.log(validatedFields);
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message:  'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
@@ -41,19 +61,30 @@ export async function createInvoice(prevState: State, formData: FormData) {
     `;
   } catch(error) {
     console.log(`Error: ${error}`);
+    return {
+      message: 'Database Error: Failed to Create Invoice.'
+    };
   }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateInvoice(id: string, prevState: State, formData: FormData) {
+  const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
 
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Invoice.'
+    }
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100
 
   try {
