@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { UpdateInvoice } from './buttons';
-import { updateInvoice } from '@/app/lib/actions'
+import { updateInvoice, State } from '@/app/lib/actions'
 import { useActionState } from 'react';
 
 export default function EditInvoiceForm({
