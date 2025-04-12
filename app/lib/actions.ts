@@ -36,11 +36,11 @@ export type State = {
 }
 
 export async function authenticate(
-  prevState:string | undefined,
+  prevState: string | undefined,
   formData: FormData,
 ) {
   try {
-    await signIn('crendentials', formData);
+    await signIn('credentials', formData);
   } catch(error) {
     if (error instanceof AuthError) {
       switch(error.type) {
